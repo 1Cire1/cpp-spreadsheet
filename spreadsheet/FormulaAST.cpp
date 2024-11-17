@@ -143,21 +143,24 @@ public:
     }
 
     double Evaluate(std::function<double(Position)>& args) const override {
+        const double lhs_value = lhs_->Evaluate(args);
+        const double rhs_value = rhs_->Evaluate(args);
+        const double EPSILON = 1e-9;
         switch (type_) {
                 
             case Add:
-                return lhs_->Evaluate(args) + rhs_->Evaluate(args);
+                return lhs_value + rhs_value;
                 
             case Subtract:
-                return lhs_->Evaluate(args) - rhs_->Evaluate(args);
+                return lhs_value - rhs_value;
                 
             case Multiply:
-                return lhs_->Evaluate(args) * rhs_->Evaluate(args);
+                return lhs_value * rhs_value;
             
             case Divide:
                 
-                if (rhs_->Evaluate(args) != 0) {
-                    return lhs_->Evaluate(args) / rhs_->Evaluate(args); 
+                if (std::abs(rhs_value) > EPSILON) {
+                    return lhs_value / rhs_value; 
                     
                 } else {
                     throw FormulaError(FormulaError::Category::Arithmetic);
@@ -203,16 +206,11 @@ public:
     }
 
     double Evaluate(std::function<double(Position)>& args) const override {
-        switch (type_) {
- 
-            case UnaryPlus:
-                return operand_->Evaluate(args);
- 
-            case UnaryMinus:
-                return -operand_->Evaluate(args); 
- 
-            default:
-                throw std::invalid_argument("unidentified operation type");
+        if (type_ == UnaryMinus) {
+            return -1 * operand_->Evaluate(args);
+        }
+        else {
+            return operand_->Evaluate(args);
         }
     }
 
